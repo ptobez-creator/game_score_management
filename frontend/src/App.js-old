@@ -1,0 +1,17 @@
+import React from "react";
+import TournamentSetup from "./components/TournamentSetup"; // Tournament setup component
+import GameRecords from "./components/GameRecords"; // Game records component
+import Leaderboard from "./components/Leaderboard"; // Leaderboard component
+
+function App() {
+  return (
+    <div className="App">
+      <h1>FIFA Tournament Dashboard</h1>
+      <TournamentSetup />
+      <GameRecords />
+      <Leaderboard />
+    </div>
+  );
+}
+
+export default App;

@@ -1,0 +1,67 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const Leaderboard = () => {
+  const [groupTable, setGroupTable] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/routes/leaderboard', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token
+          },
+        });
+        setGroupTable(response.data);
+      } catch (err) {
+        console.error('Error fetching leaderboard:', err);
+        setError('Error fetching leaderboard. Please try again.');
+      }
+    };
+
+    fetchLeaderboard();
+  }, []);
+
+  return (
+    <div className="container">
+      <h1>Leaderboard</h1>
+      {error && <p className="error">{error}</p>}
+      {groupTable.length > 0 ? (
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Played</th>
+              <th>Won</th>
+              <th>Draw</th>
+              <th>Lost</th>
+              <th>Points</th>
+              <th>Goal Difference</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groupTable.map((player, index) => (
+              <tr key={player.userId}>
+                <td>{index + 1}</td>
+                <td>{player.userId}</td>
+                <td>{player.played}</td>
+                <td>{player.won}</td>
+                <td>{player.draw}</td>
+                <td>{player.lost}</td>
+                <td>{player.points}</td>
+                <td>{player.goalDifference}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>No leaderboard data available.</p>
+      )}
+    </div>
+  );
+};
+
+export default Leaderboard;

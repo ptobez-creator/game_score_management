@@ -1,0 +1,32 @@
+const express = require('express');
+const Tournament = require('../models/Tournament');
+const authMiddleware = require('../middleware/authMiddleware');
+const router = express.Router();
+
+// Fetch leaderboard for a specific tournament
+router.get('/:tournamentId', authMiddleware, async (req, res) => {
+  try {
+    const { tournamentId } = req.params;
+
+    // Find the tournament by ID
+    const tournament = await Tournament.findById(tournamentId).populate('groupTable.userId', ['name', 'email']);
+    if (!tournament) {
+      return res.status(404).json({ msg: 'Tournament not found' });
+    }
+
+    // Sort the group table by points and goal difference
+    const leaderboard = tournament.groupTable.sort((a, b) => {
+      if (b.points === a.points) {
+        return b.goalDifference - a.goalDifference; // Sort by goal difference if points are equal
+      }
+      return b.points - a.points; // Sort by points
+    });
+
+    res.json(leaderboard);
+  } catch (err) {
+    console.error('Error fetching leaderboard:', err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+module.exports = router;

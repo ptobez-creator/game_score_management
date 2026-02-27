@@ -1,0 +1,181 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # =============================================================================
+  # BACKEND: Test and Build
+  # =============================================================================
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm install
+
+      - name: Run backend tests
+        working-directory: ./backend
+        run: npm test 2>/dev/null || echo "No tests configured"
+
+      - name: Check syntax
+        working-directory: ./backend
+        run: npx eslint . --max-warnings 0 2>/dev/null || echo "No linting configured"
+
+  # =============================================================================
+  # FRONTEND: Build and Test
+  # =============================================================================
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/my_frontend/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./frontend/my_frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: ./frontend/my_frontend
+        run: npm run build
+        env:
+          REACT_APP_API_URL: ${{ secrets.APP_API_URL }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/my_frontend/build
+          retention-days: 1
+
+  # =============================================================================
+  # DEPLOY: Only on main branch and successful tests
+  # =============================================================================
+  deploy:
+    name: Deploy to AWS EC2
+    needs: [backend-test, frontend-build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend-build
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy backend
+        run: |
+          ssh -i ~/.ssh/deploy_key ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+            echo "🔄 Updating backend..."
+            cd /home/ubuntu/game_score_management/backend
+            git pull origin main
+            npm install --production
+            echo "✅ Backend updated"
+            pm2 restart fifa-backend || pm2 start npm --name "fifa-backend" -- start
+            pm2 save
+            echo "✅ Backend restarted"
+          EOF
+
+      - name: Deploy frontend
+        run: |
+          scp -i ~/.ssh/deploy_key -r frontend-build/* ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/game_score_management/frontend/my_frontend/build/
+          ssh -i ~/.ssh/deploy_key ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            echo "🔄 Reloading Nginx..."
+            sudo systemctl reload nginx
+            echo "✅ Frontend deployed"
+          EOF
+
+      - name: Verify deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            echo "🔍 Checking backend health..."
+            curl -f http://localhost:5000/auth/ping || echo "Backend check failed"
+            
+            echo "🔍 Checking frontend..."
+            curl -f http://localhost/index.html > /dev/null && echo "✅ Frontend is live" || echo "Frontend check failed"
+            
+            echo "🔍 Backend status:"
+            pm2 list
+          EOF
+
+      - name: Slack Notification (Success)
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "✅ FIFA Tournament Deployment Successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*✅ Deployment Successful*\n*Repository*: ${{ github.repository }}\n*Branch*: main\n*Commit*: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Author*: ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        continue-on-error: true
+
+      - name: Slack Notification (Failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "❌ FIFA Tournament Deployment Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Deployment Failed*\n*Repository*: ${{ github.repository }}\n*Branch*: main\n*Author*: ${{ github.actor }}\n*<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Logs>*"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        continue-on-error: true

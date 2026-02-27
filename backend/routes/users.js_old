@@ -1,0 +1,95 @@
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const User = require('../models/User');
+const authMiddleware = require('../middleware/authMiddleware');
+const router = express.Router();
+
+// Fetch current user's profile
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(400).json({ msg: 'User ID is required' });
+    }
+
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching user profile:', error.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// Fetch user IDs by names or validate existing IDs
+router.post('/get-ids', async (req, res) => {
+  const { names } = req.body;
+
+  if (!names || !Array.isArray(names) || names.length === 0) {
+    return res.status(400).json({ msg: 'A valid array of names or IDs is required' });
+  }
+
+  try {
+    const isObjectId = /^[0-9a-fA-F]{24}$/;
+    const filter = names.every(name => isObjectId.test(name))
+      ? { _id: { $in: names } }
+      : { name: { $in: names } };
+
+    const users = await User.find(filter).select('_id name');
+
+    const userIds = users.map(user => user._id.toString());
+    const foundNames = users.map(user => user.name);
+    const missingInputs = names.filter(
+      input => !userIds.includes(input) && !foundNames.includes(input)
+    );
+
+    res.json({ ids: userIds, missing: missingInputs });
+  } catch (error) {
+    console.error('Error fetching user IDs:', error.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// Search users by name (autocomplete functionality)
+router.get('/search', async (req, res) => {
+  const { query } = req.query;
+
+  if (!query || query.trim().length === 0) {
+    return res.status(400).json({ msg: 'Search query is required' });
+  }
+
+  try {
+    const users = await User.find({ name: { $regex: query, $options: 'i' } }).limit(10);
+    const names = users.map(user => user.name);
+
+    res.json(names);
+  } catch (error) {
+    console.error('Error searching for users:', error.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// Validate participant IDs
+router.post('/validate-ids', async (req, res) => {
+  const { ids } = req.body;
+
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ msg: 'A valid array of user IDs is required' });
+  }
+
+  try {
+    const users = await User.find({ _id: { $in: ids } }).select('_id name');
+
+    const validIds = users.map(user => user._id.toString());
+    const invalidIds = ids.filter(id => !validIds.includes(id));
+
+    res.json({ valid: validIds, invalid: invalidIds });
+  } catch (error) {
+    console.error('Error validating user IDs:', error.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+module.exports = router;

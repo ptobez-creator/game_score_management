@@ -1,0 +1,251 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+const TournamentSetup = () => {
+  const [numPlayers, setNumPlayers] = useState(4);
+  const [playerNames, setPlayerNames] = useState(Array(4).fill(''));
+  const [userIds, setUserIds] = useState([]);
+  const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [step, setStep] = useState(1);
+  const [userProfile, setUserProfile] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  // Fetch the user profile after mounting
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      try {
+        const response = await axios.get('http://localhost:5000/users/me', {
+          headers: { Authorization: `Bearer ${token}` }, // Updated header
+        });
+        setUserProfile(response.data);
+      } catch (err) {
+        console.error('Error fetching user profile:', err);
+        navigate('/login');
+      }
+    };
+    fetchUserProfile();
+  }, [navigate]);
+
+  // Fetch search results for player names
+  useEffect(() => {
+    if (searchQuery.length > 2) {
+      const fetchSearchResults = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:5000/users/search?query=${searchQuery}`
+          );
+          setSearchResults(response.data);
+        } catch (err) {
+          console.error('Error fetching search results:', err);
+        }
+      };
+      fetchSearchResults();
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
+  // Handle number of players change
+  const handleNumPlayersChange = (e) => {
+    const num = Math.min(16, Math.max(4, parseInt(e.target.value) || 4));
+    setNumPlayers(num);
+    setPlayerNames(Array(num).fill(''));
+    setUserIds([]);
+    setRegisteredUsers([]);
+  };
+
+  // Handle name change and search
+  const handleNameChange = (index, e) => {
+    const updatedNames = [...playerNames];
+    updatedNames[index] = e.target.value;
+    setPlayerNames(updatedNames);
+    setSearchQuery(updatedNames[index]);
+  };
+
+  // Add participant from search results
+  const addParticipant = (name, index) => {
+    const updatedNames = [...playerNames];
+    updatedNames[index] = name;
+    setPlayerNames(updatedNames);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  // Fetch user IDs for participants
+  const fetchUserIds = async () => {
+    setLoading(true);
+    setError('');
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Authentication token not found. Please log in.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const sanitizedNames = playerNames.map(name => name.trim());
+      const response = await axios.post(
+        'http://localhost:5000/users/get-ids',
+        { names: sanitizedNames },
+        {
+          headers: { Authorization: `Bearer ${token}` }, // Updated header
+        }
+      );
+      setUserIds(response.data.ids);
+      setRegisteredUsers(
+        sanitizedNames.map((name, index) => ({
+          name,
+          id: response.data.ids[index],
+        }))
+      );
+      setStep(3);
+    } catch (err) {
+      console.error('Error fetching user IDs:', err);
+      setError(err.response?.data?.msg || 'Error fetching user IDs. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create the tournament
+  const createTournament = async () => {
+    setLoading(true);
+    setError('');
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Authentication token not found. Please log in.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/tournaments',
+        {
+          name: `Tournament for ${numPlayers} Players`,
+          participants: userIds,
+          startDate: new Date(),
+          endDate: new Date(new Date().setDate(new Date().getDate() + 7)),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }, // Updated header
+        }
+      );
+
+      alert('Tournament created successfully!');
+      console.log('Tournament Created:', response.data);
+    } catch (err) {
+      console.error('Error creating tournament:', err);
+      setError(err.response?.data?.msg || 'Error creating tournament. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
+  return (
+    <div>
+      <header>
+        <h3>Tournament Setup</h3>
+        {userProfile && (
+          <div>
+            <p>
+              Logged in as: {userProfile.name} ({userProfile.email})
+            </p>
+            <button onClick={handleLogout}>Logout</button>
+          </div>
+        )}
+      </header>
+
+      {step === 1 && (
+        <div>
+          <h4>Step 1: Choose Number of Players</h4>
+          <input
+            type="number"
+            value={numPlayers}
+            onChange={handleNumPlayersChange}
+            min={4}
+            max={16}
+            disabled={loading}
+          />
+          <button
+            onClick={() => setStep(2)}
+            disabled={loading || numPlayers < 4}
+          >
+            Next: Enter Player Names
+          </button>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div>
+          <h4>Step 2: Enter Player Names</h4>
+          {playerNames.map((name, index) => (
+            <div key={index}>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => handleNameChange(index, e)}
+                placeholder={`Enter name for Player ${index + 1}`}
+                disabled={loading}
+              />
+              {searchQuery && searchResults.length > 0 && (
+                <ul>
+                  {searchResults.map((result, idx) => (
+                    <li key={idx} onClick={() => addParticipant(result, index)}>
+                      {result}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+          <button
+            onClick={fetchUserIds}
+            disabled={loading || playerNames.some(name => name.trim() === '')}
+          >
+            Next: Review Participants
+          </button>
+          {error && <p className="error">{error}</p>}
+        </div>
+      )}
+
+      {step === 3 && (
+        <div>
+          <h4>Step 3: Review and Create Tournament</h4>
+          <ul>
+            {registeredUsers.map((user, index) => (
+              <li key={index}>
+                {user.name} (ID: {user.id})
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={createTournament}
+            disabled={loading || userIds.length !== numPlayers}
+          >
+            Create Tournament
+          </button>
+          {error && <p className="error">{error}</p>}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TournamentSetup;

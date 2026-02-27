@@ -1,0 +1,28 @@
+import React, { useState } from "react";
+
+function TournamentSetup() {
+  const [numPlayers, setNumPlayers] = useState(4); // Default to 4 players
+
+  const handlePlayerCountChange = (e) => {
+    setNumPlayers(e.target.value);
+  };
+
+  const handleStartTournament = () => {
+    // Add logic to start the tournament
+    console.log(`Tournament started with ${numPlayers} players`);
+  };
+
+  return (
+    <div>
+      <h2>Tournament Setup</h2>
+      <label>Select number of players:</label>
+      <select value={numPlayers} onChange={handlePlayerCountChange}>
+        <option value="4">4 Players</option>
+        <option value="6">6 Players</option>
+      </select>
+      <button onClick={handleStartTournament}>Start Tournament</button>
+    </div>
+  );
+}
+
+export default TournamentSetup;

@@ -1,0 +1,133 @@
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const authRoutes = require('./routes/auth');
+const tournamentRoutes = require('./routes/tournaments');
+const gameRoutes = require('./routes/games');
+const connectDB = require('./config/db');
+const http = require('http');
+const { Server } = require('socket.io');
+const bodyParser = require('body-parser');
+const User = require('./models/User');  // Corrected the import path for User model
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const leaderboardRoutes = require('./routes/leaderboard');
+const usersRoutes = require('./routes/users'); // Import users routes
+
+dotenv.config(); // Load environment variables
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+const server = http.createServer(app); // Create an HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000', // Your React app's URL
+    methods: ['GET', 'POST']
+  }
+});
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(bodyParser.json());
+
+// Connect to MongoDB
+connectDB();
+
+// Routes
+app.use('/auth', authRoutes);
+app.use('/tournaments', tournamentRoutes);
+app.use('/games', gameRoutes);
+app.use('/users', usersRoutes); // Mount users routes
+app.use('/leaderboard', leaderboardRoutes);
+
+// Login endpoint (already added correctly)
+app.post('/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: 'User not found' });
+
+    // Compare the provided password with the stored hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
+
+    // Create payload with user ID
+    const payload = { user: { id: user.id } };
+
+    // Sign JWT and send back to frontend
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.json({ token }); // Send the token to the frontend
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// Endpoint to start the tournament
+app.post('/tournaments/start-tournament', async (req, res) => {
+  try {
+    res.status(200).json({ msg: 'Tournament started!' });  // Send success message
+  } catch (err) {
+    console.error('Error starting tournament:', err);
+    res.status(500).json({ msg: 'Error starting tournament' });
+  }
+});
+
+// Socket.IO events
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  // Listen for score update events
+  socket.on('update-score', (data) => {
+    console.log('Score updated:', data);
+
+    // Notify opponent to review the score
+    io.emit('score-updated', {
+      opponent: data.player2, // Notify player2
+      message: `${data.player1} has updated the score. Please review the score.`
+    });
+  });
+
+  // Listen for score approval events
+  socket.on('score-approved', (data) => {
+    console.log(`Player ${data.player} has approved the score.`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('A user disconnected:', socket.id);
+  });
+
+  // Listen for the score update notification (toast message can be handled on frontend)
+  socket.on('score-updated', (data) => {
+    // Remove the toast.info here, since the frontend is handling the toast notifications.
+    console.log(data.message); // For debugging purposes
+  });
+});
+
+// Sample route for updating scores
+app.post('/update-score', async (req, res) => {
+  const { player1, player2, score1, score2 } = req.body;
+
+  // Save the score to your database (implement according to your schema)
+  // Example:
+  // await Game.create({ player1, player2, score1, score2 });
+
+  // Emit event to notify player2 about score approval (via Socket.IO)
+  io.emit('score-updated', {
+    opponent: player2,
+    message: `Player 1 has updated the score. Please review the score.`
+  });
+
+  res.status(200).json({ message: 'Score updated and notification sent.' });
+});
+
+// Start the server
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

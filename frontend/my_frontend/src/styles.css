@@ -1,0 +1,853 @@
+/* ========================================
+   GLOBAL STYLES
+   ======================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: #333;
+  min-height: 100vh;
+}
+
+.App {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+.App > h1 {
+  text-align: center;
+  color: white;
+  padding: 30px 20px 20px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   NAVIGATION
+   ======================================== */
+nav {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 15px 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+nav a {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  padding: 8px 16px;
+  border-radius: 5px;
+}
+
+nav a:hover {
+  color: #3498db;
+  background-color: rgba(52, 152, 219, 0.1);
+  transform: translateY(-2px);
+}
+
+nav button {
+  background: none !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px 16px !important;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+nav button:hover {
+  color: #e74c3c !important;
+  background-color: rgba(231, 76, 60, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   CONTAINERS & BACKGROUNDS
+   ======================================== */
+.container {
+  background-color: white;
+  border-radius: 12px;
+  padding: 30px;
+  margin: 20px auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-width: 1000px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.leaderboard-container {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   LEADERBOARD STYLES
+   ======================================== */
+.leaderboard-header {
+  text-align: center;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 15px;
+}
+
+.tournament-title {
+  color: #2c3e50;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.leaderboard-table-wrapper {
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-table {
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+.leaderboard-table thead {
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.leaderboard-table thead th {
+  padding: 18px 10px;
+  border: none;
+  text-align: center;
+}
+
+.rank-col {
+  width: 8%;
+}
+
+.player-col {
+  width: 20%;
+  text-align: left;
+}
+
+.stat-col {
+  width: 8%;
+}
+
+.points-col {
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+.leaderboard-table tbody tr {
+  border-bottom: 1px solid #ecf0f1;
+  transition: all 0.2s ease;
+}
+
+.leaderboard-table tbody tr:hover {
+  background-color: #f8f9fa;
+  box-shadow: inset 0 0 10px rgba(52, 152, 219, 0.05);
+}
+
+.leaderboard-table tbody td {
+  padding: 16px 10px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.rank-cell {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3498db;
+}
+
+.player-name {
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.stat-cell {
+  font-weight: 500;
+  color: #555;
+}
+
+.points-cell {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #3498db;
+  background-color: rgba(52, 152, 219, 0.1);
+  border-radius: 5px;
+}
+
+.goal-diff {
+  font-weight: 600;
+}
+
+/* Medal styles for top 3 positions */
+.first-place {
+  background: linear-gradient(90deg, rgba(240, 184, 48, 0.1) 0%, transparent 100%);
+  border-left: 4px solid #f0b830;
+}
+
+.first-place .rank-cell {
+  color: #f0b830;
+  font-size: 1.2rem;
+}
+
+.first-place .player-name {
+  color: #000;
+  font-weight: 700;
+}
+
+.second-place {
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.1) 0%, transparent 100%);
+  border-left: 4px solid #c0c0c0;
+}
+
+.second-place .rank-cell {
+  color: #c0c0c0;
+  font-size: 1.15rem;
+}
+
+.third-place {
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.1) 0%, transparent 100%);
+  border-left: 4px solid #cd7f32;
+}
+
+.third-place .rank-cell {
+  color: #cd7f32;
+  font-size: 1.1rem;
+}
+
+/* ========================================
+   LOGIN FORM STYLES
+   ======================================== */
+.login-container {
+  max-width: 450px;
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  margin: 60px auto;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #ecf0f1;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.form-buttons button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-btn {
+  background: #3498db;
+  color: white;
+}
+
+.login-btn:hover {
+  background: #2980b9;
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+  transform: translateY(-2px);
+}
+
+.signup-btn {
+  background: #27ae60;
+  color: white;
+}
+
+.signup-btn:hover {
+  background: #229954;
+  box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   TOURNAMENT LIST STYLES
+   ======================================== */
+.tournaments-header {
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 15px;
+}
+
+.tournaments-header h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.tournament-card {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border-left: 5px solid #3498db;
+}
+
+.tournament-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+}
+
+.tournament-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.tournament-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 15px 0;
+  font-size: 0.9rem;
+}
+
+.tournament-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tournament-info-label {
+  font-weight: 600;
+  color: #7f8c8d;
+}
+
+.tournament-info-value {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.tournament-status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-scheduled {
+  background-color: #e8f4f8;
+  color: #16a085;
+  border: 1px solid #16a085;
+}
+
+.status-active {
+  background-color: #fef9e7;
+  color: #f39c12;
+  border: 1px solid #f39c12;
+}
+
+.status-completed {
+  background-color: #e8f8f5;
+  color: #16a085;
+  border: 1px solid #27ae60;
+}
+
+.tournament-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.tournament-buttons button {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.btn-view-matches {
+  background: #3498db;
+  color: white;
+}
+
+.btn-view-matches:hover {
+  background: #2980b9;
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+.btn-view-leaderboard {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-view-leaderboard:hover {
+  background: #229954;
+  box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+}
+
+/* ========================================
+   FORM STYLES
+   ======================================== */
+.form-container {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  margin: 20px 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-section-title {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin: 20px 0 15px;
+  font-weight: 700;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+}
+
+/* ========================================
+   MATCH STYLES
+   ======================================== */
+.matches-container {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+}
+
+.match-section {
+  margin-bottom: 30px;
+}
+
+.match-section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #3498db;
+}
+
+.match-section-title.warning {
+  color: #f39c12;
+  border-bottom-color: #f39c12;
+}
+
+.match-section-title.info {
+  color: #3498db;
+  border-bottom-color: #3498db;
+}
+
+.match-table {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.match-table table {
+  margin-bottom: 0;
+}
+
+.match-table thead {
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+}
+
+.match-table tbody tr {
+  border-bottom: 1px solid #ecf0f1;
+  transition: all 0.2s ease;
+}
+
+.match-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.match-input {
+  max-width: 70px;
+  padding: 8px !important;
+  text-align: center;
+  border: 2px solid #3498db !important;
+  border-radius: 4px !important;
+}
+
+.match-input:focus {
+  outline: none;
+  border-color: #2980b9 !important;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2) !important;
+}
+
+/* ========================================
+   BUTTON STYLES
+   ======================================== */
+.btn {
+  padding: 10px 20px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.btn-primary {
+  background-color: #3498db !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9 !important;
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #95a5a6 !important;
+  color: white !important;
+}
+
+.btn-secondary:hover {
+  background-color: #7f8c8d !important;
+  box-shadow: 0 5px 15px rgba(127, 140, 141, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background-color: #27ae60 !important;
+  color: white !important;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #229954 !important;
+  box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background-color: #e74c3c !important;
+  color: white !important;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b !important;
+  box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3) !important;
+}
+
+.btn-sm {
+  padding: 6px 12px !important;
+  font-size: 0.85rem !important;
+}
+
+.btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ========================================
+   ALERT STYLES
+   ======================================== */
+.alert {
+  border-radius: 8px !important;
+  border: 2px solid !important;
+  padding: 15px 20px !important;
+  margin-bottom: 20px !important;
+}
+
+.alert-danger {
+  background-color: #fadbd8 !important;
+  border-color: #e74c3c !important;
+  color: #c0392b !important;
+}
+
+.alert-success {
+  background-color: #d5f4e6 !important;
+  border-color: #27ae60 !important;
+  color: #145a32 !important;
+}
+
+.alert-info {
+  background-color: #d6eaf8 !important;
+  border-color: #3498db !important;
+  color: #1b4965 !important;
+}
+
+.alert-warning {
+  background-color: #fdebd0 !important;
+  border-color: #f39c12 !important;
+  color: #7d4f02 !important;
+}
+
+/* ========================================
+   TABLE STYLES
+   ======================================== */
+.table-responsive {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.table {
+  border-collapse: collapse;
+  margin: 0;
+}
+
+.table thead {
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table thead th {
+  padding: 15px;
+  border: none;
+  text-align: center;
+}
+
+.table tbody td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+    margin: 15px;
+  }
+
+  .App > h1 {
+    font-size: 1.8rem;
+    padding: 20px 10px 15px;
+  }
+
+  nav {
+    padding: 12px 15px;
+  }
+
+  nav ul {
+    gap: 15px;
+  }
+
+  nav a {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  .tournament-info {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .button-group button {
+    width: 100% !important;
+  }
+
+  .tournament-buttons {
+    flex-direction: column;
+  }
+
+  .tournament-buttons button {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  .form-buttons button {
+    width: 100%;
+  }
+
+  .leaderboard-table {
+    font-size: 0.85rem;
+  }
+
+  .leaderboard-table thead th,
+  .leaderboard-table tbody td {
+    padding: 10px 5px;
+  }
+
+  .tournament-title,
+  .login-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .login-container {
+    padding: 25px;
+    margin: 30px auto;
+  }
+
+  .table thead th {
+    padding: 10px 5px;
+  }
+
+  .table tbody td {
+    padding: 8px 5px;
+  }
+
+  .match-input {
+    max-width: 60px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .App > h1 {
+    font-size: 1.4rem;
+  }
+
+  nav ul {
+    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  nav a,
+  nav button {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+
+  .login-container {
+    padding: 20px;
+  }
+
+  .leaderboard-table {
+    font-size: 0.75rem;
+  }
+
+  .leaderboard-table thead th,
+  .leaderboard-table tbody td {
+    padding: 8px 3px;
+  }
+
+  .rank-col {
+    width: 10%;
+  }
+
+  .player-col {
+    width: 25%;
+  }
+
+  .stat-col {
+    width: 7%;
+  }
+
+  .tournament-title,
+  .login-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .match-input {
+    max-width: 50px;
+    padding: 5px !important;
+    font-size: 0.8rem;
+  }
+}

@@ -1,0 +1,85 @@
+const express = require('express');
+const Tournament = require('../models/Tournament');
+const axios = require('axios');
+const authMiddleware = require('../middleware/authMiddleware');
+const router = express.Router();
+
+router.post('/', authMiddleware, async (req, res) => {
+  const { name, participants, startDate, endDate } = req.body;
+
+  try {
+    console.log('Tournament creation request by:', req.user); // Debug log
+    if (!req.user || !req.user.id) {
+      return res.status(400).json({ msg: 'User ID is missing from the request' });
+    }
+
+    // Validate required fields
+    if (!name || !participants || !Array.isArray(participants) || participants.length < 2 || !startDate || !endDate) {
+      console.error('Validation error in tournament creation'); // Debug log
+      return res.status(400).json({ msg: 'All fields are required and participants must be at least 2' });
+    }
+
+    console.log('Fetching user IDs for participants:', participants); // Debug log
+    let participantIds = [];
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/users/get-ids',
+        { names: participants }
+      );
+      participantIds = response.data.ids;
+    } catch (err) {
+      console.error('Error fetching user IDs:', err.message); // Debug log
+      return res.status(400).json({ msg: 'Error fetching user IDs. Please ensure names are correct.' });
+    }
+
+    if (participantIds.length !== participants.length) {
+      console.error('Mismatch in participant IDs fetched'); // Debug log
+      return res.status(400).json({ msg: 'Some participants not found' });
+    }
+
+    // Initialize the group table
+    const groupTable = participantIds.map(id => ({
+      userId: id,
+      played: 0,
+      won: 0,
+      lost: 0,
+      draw: 0,
+      points: 0,
+      goalDifference: 0,
+    }));
+
+    // Create round-robin matches
+    const matches = [];
+    for (let i = 0; i < participantIds.length; i++) {
+      for (let j = i + 1; j < participantIds.length; j++) {
+        matches.push({
+          player1: participantIds[i],
+          player2: participantIds[j],
+          score: null, // Placeholder for scores
+          status: 'pending', // Match status
+        });
+      }
+    }
+
+    // Create and save the tournament
+    const newTournament = new Tournament({
+      name,
+      participants: participantIds,
+      groupTable,
+      matches,
+      startDate,
+      endDate,
+      status: 'scheduled',
+      creator: req.user.id,
+    });
+
+    await newTournament.save();
+    console.log('Tournament created successfully:', newTournament); // Debug log
+    res.status(201).json(newTournament);
+  } catch (err) {
+    console.error('Error creating tournament:', err.message); // Debug log
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+module.exports = router;
