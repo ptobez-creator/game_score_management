@@ -25,9 +25,7 @@ const TournamentSetup = () => {
         return;
       }
       try {
-        const response = await axios.get(process.env.REACT_APP_API_URL + '/users/me', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get('/users/me');
         setUserProfile(response.data);
       } catch (err) {
         console.error('Error fetching user profile:', err);
@@ -43,7 +41,7 @@ const TournamentSetup = () => {
       const fetchSearchResults = async () => {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/users/search?query=${searchQuery}`
+            `/users/search?query=${searchQuery}`
           );
           setSearchResults(response.data);
         } catch (err) {
@@ -92,9 +90,8 @@ const TournamentSetup = () => {
     try {
       const sanitizedNames = playerNames.map((name) => name.trim().toLowerCase());
       const response = await axios.post(
-        process.env.REACT_APP_API_URL + '/users/get-ids',
-        { names: sanitizedNames },
-        { headers: { Authorization: `Bearer ${token}` } }
+        '/users/get-ids',
+        { names: sanitizedNames }
       );
 
       const fetchedUsers = response.data.ids || [];

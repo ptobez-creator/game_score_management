@@ -26,7 +26,7 @@ const Login = ({ setUser }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(process.env.REACT_APP_API_URL + '/auth/login', {
+      const response = await axios.post('/auth/login', {
         email,
         password,
       });
@@ -47,7 +47,7 @@ const Login = ({ setUser }) => {
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(process.env.REACT_APP_API_URL + '/auth/register', {
+      const response = await axios.post('/auth/register', {
         name,
         email,
         password,
@@ -78,7 +78,7 @@ const Login = ({ setUser }) => {
     setSuccess('');
 
     try {
-      await axios.post(process.env.REACT_APP_API_URL + '/auth/forgot-password', {
+      await axios.post('/auth/forgot-password', {
         email: resetEmail,
       });
 

@@ -44,8 +44,7 @@ const TournamentMatches = () => {
       }
 
       const tournamentResponse = await axios.get(
-        `${process.env.REACT_APP_API_URL}/tournaments/${tournamentId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `/tournaments/${tournamentId}`
       );
 
       if (tournamentResponse.data) {
@@ -56,8 +55,7 @@ const TournamentMatches = () => {
         for (const playerId of tournamentResponse.data.participants) {
           try {
             const userResponse = await axios.get(
-              `${process.env.REACT_APP_API_URL}/users/${playerId}`,
-              { headers: { Authorization: `Bearer ${token}` } }
+              `/users/${playerId}`
             );
             playerDetails[playerId] = userResponse.data;
           } catch (err) {
@@ -96,7 +94,7 @@ const TournamentMatches = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        process.env.REACT_APP_API_URL + '/submit-score',
+        '/submit-score',
         {
           tournamentId: tournamentId,
           matchId: match._id,
@@ -104,8 +102,7 @@ const TournamentMatches = () => {
           player2Id: match.player2,
           score1: scores.score1,
           score2: scores.score2,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
 
       toast.success('Score submitted! Waiting for opponent approval.');
@@ -139,12 +136,11 @@ const TournamentMatches = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        process.env.REACT_APP_API_URL + '/approve-score',
+        '/approve-score',
         {
           tournamentId: tournamentId,
           matchId: match._id,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
 
       toast.success('✓ Score approved and finalized!');
@@ -176,13 +172,12 @@ const TournamentMatches = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        process.env.REACT_APP_API_URL + '/dispute-score',
+        '/dispute-score',
         {
           tournamentId: tournamentId,
           matchId: matchId,
           reason: reason,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
 
       toast.error('Score disputed. Please re-enter the correct score.');
