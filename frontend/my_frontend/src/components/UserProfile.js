@@ -26,9 +26,7 @@ const UserProfile = () => {
         return;
       }
 
-      const response = await axios.get(process.env.REACT_APP_API_URL + '/users/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get('/users/me');
 
       setUserData(response.data);
       setName(response.data.name || '');
@@ -89,9 +87,7 @@ const UserProfile = () => {
         profilePicture: profilePicture
       };
 
-      await axios.put(process.env.REACT_APP_API_URL + '/users/me', updateData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put('/users/me', updateData);
 
       toast.success('Profile updated successfully!');
       fetchUserData();

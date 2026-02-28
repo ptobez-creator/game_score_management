@@ -21,10 +21,7 @@ const TournamentsList = () => {
           return;
         }
 
-        const response = await axios.get(
-          process.env.REACT_APP_API_URL + '/tournaments',
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const response = await axios.get('/tournaments');
 
         if (Array.isArray(response.data)) {
           setTournaments(response.data);

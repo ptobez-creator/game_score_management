@@ -13,6 +13,7 @@ const TeamJoin = ({ onTeamSelected }) => {
   const [loading, setLoading] = useState(false);
   const [currentTeam, setCurrentTeam] = useState(null);
   const [searchParams] = useSearchParams();
+  const searchParamsKey = searchParams.toString();
   const navigate = useNavigate();
 
   // Check if already in a team
@@ -22,9 +23,7 @@ const TeamJoin = ({ onTeamSelected }) => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await axios.get(process.env.REACT_APP_API_URL + '/teams/my-team', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get('/teams/my-team');
 
         setCurrentTeam(response.data);
         if (onTeamSelected) {
@@ -42,7 +41,7 @@ const TeamJoin = ({ onTeamSelected }) => {
     };
 
     checkCurrentTeam();
-  }, [searchParams, onTeamSelected]);
+  }, [searchParamsKey, onTeamSelected]);
 
   const handleCreateTeam = async (e) => {
     e.preventDefault();
@@ -54,11 +53,9 @@ const TeamJoin = ({ onTeamSelected }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(process.env.REACT_APP_API_URL + '/teams/create', {
+      const response = await axios.post('/teams/create', {
         name: teamName,
         description: teamDescription,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       setCurrentTeam(response.data.team);
@@ -85,10 +82,8 @@ const TeamJoin = ({ onTeamSelected }) => {
     try {
       const token = localStorage.getItem('token');
       // Call backend to find and join team by name
-      const response = await axios.post(process.env.REACT_APP_API_URL + '/teams/join-by-name', {
+      const response = await axios.post('/teams/join-by-name', {
         teamName: joinTeamName,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       setCurrentTeam(response.data.team);
@@ -114,10 +109,8 @@ const TeamJoin = ({ onTeamSelected }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(process.env.REACT_APP_API_URL + '/teams/join-by-code', {
+      const response = await axios.post('/teams/join-by-code', {
         code: inviteCode,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       setCurrentTeam(response.data.team);

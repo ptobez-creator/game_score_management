@@ -94,4 +94,17 @@ router.get('/:tournamentId', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/:tournamentId/matches', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user || !user.team) return res.status(404).json({ msg: 'No team' });
+    const tournament = await Tournament.findOne({ _id: req.params.tournamentId, team: user.team });
+    if (!tournament) return res.status(404).json({ msg: 'Tournament not found' });
+    res.json(tournament.matches);
+  } catch (err) {
+    console.error('Error fetching matches:', err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;

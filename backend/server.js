@@ -22,20 +22,43 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
 
-// Allow multiple frontend origins (e.g. ports 3000 and 3001)
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+// Allow multiple frontend origins (local + production)
+const frontendOriginsFromEnv = [
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS || '').split(',').map((origin) => origin.trim()),
+].filter(Boolean);
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  ...frontendOriginsFromEnv,
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
 
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allow Authorization header
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   },
 });
 
 // Middleware
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 
@@ -272,6 +295,17 @@ app.post('/dispute-score', authMiddleware, async (req, res) => {
 });
 
 // Start the server
+server.on('error', (error) => {
+  if (error && error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Stop the running process or change PORT in your .env file.`);
+    process.exit(1);
+    return;
+  }
+
+  console.error('Server failed to start:', error);
+  process.exit(1);
+});
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

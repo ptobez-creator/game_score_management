@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, Link, useLocation } from 'react-router-dom';
 import Home from './components/Home';
 import Login from './components/Login';
@@ -22,6 +22,7 @@ function AppContent() {
   const [user, setUser] = useState(null);
   const [currentTeam, setCurrentTeam] = useState(null);
   const [loadingTeam, setLoadingTeam] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const location = useLocation();
 
   const isTokenValid = (token) => {
@@ -33,23 +34,37 @@ function AppContent() {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token && isTokenValid(token)) {
-      const decoded = jwtDecode(token);
-      setUser({ id: decoded.user.id, email: decoded.user.email });
-      checkTeamStatus(token);
+  const setAuthHeader = (token) => {
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
-      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
     }
+  };
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token && isTokenValid(token)) {
+        const decoded = jwtDecode(token);
+        setUser({ id: decoded.user.id, email: decoded.user.email });
+        setAuthHeader(token);
+        await checkTeamStatus();
+      } else {
+        localStorage.removeItem('token');
+        setAuthHeader(null);
+      }
+
+      setAuthLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
-  const checkTeamStatus = async (token) => {
+  const checkTeamStatus = async () => {
     setLoadingTeam(true);
     try {
-      const response = await axios.get('http://localhost:5000/teams/my-team', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get('/teams/my-team');
       setCurrentTeam(response.data);
     } catch (err) {
       setCurrentTeam(null);
@@ -60,15 +75,21 @@ function AppContent() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    setAuthHeader(null);
     setUser(null);
     setCurrentTeam(null);
+    setAuthLoading(false);
   };
 
-  const handleTeamSelected = (team) => {
+  const handleTeamSelected = useCallback((team) => {
     setCurrentTeam(team);
-  };
+  }, []);
 
-  const showNavbar = user && !['/', '/login', '/team-join'].includes(location.pathname) && !loadingTeam;
+  const showNavbar = user && !['/', '/login', '/team-join'].includes(location.pathname) && !loadingTeam && !authLoading;
+
+  if (authLoading) {
+    return null;
+  }
 
   return (
     <>

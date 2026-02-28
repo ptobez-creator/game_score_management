@@ -13,14 +13,13 @@ const createTournamentAPI = async ({ name, playerIds }) => {
 
   try {
     const response = await axios.post(
-      process.env.REACT_APP_API_URL + '/tournaments',
+      '/tournaments',
       {
         name: name || `Tournament - ${new Date().toLocaleDateString()}`,
         participants: playerIds,
         startDate: new Date(),
         endDate: new Date(new Date().setDate(new Date().getDate() + 7)),
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
+      }
     );
 
     return response.data;
@@ -45,9 +44,7 @@ const CreateTournament = () => {
   const fetchTeamMembers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(process.env.REACT_APP_API_URL + '/teams/team-members', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get('/teams/team-members');
 
       // Extract user IDs from team members
       const members = response.data.members || response.data;

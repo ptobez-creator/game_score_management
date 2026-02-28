@@ -20,15 +20,11 @@ const Dashboard = () => {
       const token = localStorage.getItem('token');
 
       // Fetch team info
-      const teamResponse = await axios.get(process.env.REACT_APP_API_URL + '/teams/my-team', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const teamResponse = await axios.get('/teams/my-team');
       setTeamName(teamResponse.data.name);
 
       // Fetch all tournaments for the team
-      const tournamentsResponse = await axios.get(process.env.REACT_APP_API_URL + '/tournaments', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const tournamentsResponse = await axios.get('/tournaments');
 
       // Aggregate stats across all tournaments
       const statsMap = {};

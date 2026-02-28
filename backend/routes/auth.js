@@ -5,6 +5,10 @@ const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware');
 const router = express.Router();
 
+router.get('/ping', (req, res) => {
+  res.status(200).json({ ok: true, msg: 'auth ping' });
+});
+
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
 

@@ -5,8 +5,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../config/runtimeConfig';
 
-const socket = io(process.env.REACT_APP_API_URL + '');
+const socket = io(API_URL);
 
 const GameRecords = () => {
   const [games, setGames] = useState([]);
@@ -22,9 +23,7 @@ const GameRecords = () => {
           return;
         }
 
-        const response = await axios.get(process.env.REACT_APP_API_URL + '/games', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get('/games');
         setGames(response.data);
       } catch (err) {
         console.error('Error fetching games:', err);
