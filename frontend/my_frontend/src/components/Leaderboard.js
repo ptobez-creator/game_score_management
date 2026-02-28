@@ -31,7 +31,7 @@ const Leaderboard = () => {
 
         // Fetch the tournament to get the name and group table
         const response = await axios.get(
-          `http://localhost:5000/tournaments/${tournamentId}`,
+          `${process.env.REACT_APP_API_URL}/tournaments/${tournamentId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -47,7 +47,7 @@ const Leaderboard = () => {
               if (typeof entry.player === 'string') {
                 // If player is just an ID, fetch user details
                 const userResponse = await axios.get(
-                  `http://localhost:5000/users/${entry.player}`,
+                  `${process.env.REACT_APP_API_URL}/users/${entry.player}`,
                   { headers: { Authorization: `Bearer ${token}` } }
                 );
                 return { ...entry, playerData: userResponse.data };

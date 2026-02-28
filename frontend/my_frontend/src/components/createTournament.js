@@ -13,7 +13,7 @@ const createTournamentAPI = async ({ name, playerIds }) => {
 
   try {
     const response = await axios.post(
-      'http://localhost:5000/tournaments',
+      process.env.REACT_APP_API_URL + '/tournaments',
       {
         name: name || `Tournament - ${new Date().toLocaleDateString()}`,
         participants: playerIds,
@@ -45,7 +45,7 @@ const CreateTournament = () => {
   const fetchTeamMembers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/teams/team-members', {
+      const response = await axios.get(process.env.REACT_APP_API_URL + '/teams/team-members', {
         headers: { Authorization: `Bearer ${token}` },
       });
 

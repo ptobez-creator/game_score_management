@@ -13,7 +13,7 @@ const createTournamentAPI = async ({ numPlayers, userIds }) => {
 
   try {
     const response = await axios.post(
-      'http://localhost:5000/tournaments',
+      process.env.REACT_APP_API_URL + '/tournaments',
       {
         name: `Tournament for ${numPlayers} Players`,
         participants: userIds,

@@ -26,7 +26,7 @@ const UserProfile = () => {
         return;
       }
 
-      const response = await axios.get('http://localhost:5000/users/me', {
+      const response = await axios.get(process.env.REACT_APP_API_URL + '/users/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -89,7 +89,7 @@ const UserProfile = () => {
         profilePicture: profilePicture
       };
 
-      await axios.put('http://localhost:5000/users/me', updateData, {
+      await axios.put(process.env.REACT_APP_API_URL + '/users/me', updateData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

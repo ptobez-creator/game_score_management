@@ -44,7 +44,7 @@ const TournamentMatches = () => {
       }
 
       const tournamentResponse = await axios.get(
-        `http://localhost:5000/tournaments/${tournamentId}`,
+        `${process.env.REACT_APP_API_URL}/tournaments/${tournamentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -56,7 +56,7 @@ const TournamentMatches = () => {
         for (const playerId of tournamentResponse.data.participants) {
           try {
             const userResponse = await axios.get(
-              `http://localhost:5000/users/${playerId}`,
+              `${process.env.REACT_APP_API_URL}/users/${playerId}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
             playerDetails[playerId] = userResponse.data;
@@ -96,7 +96,7 @@ const TournamentMatches = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/submit-score',
+        process.env.REACT_APP_API_URL + '/submit-score',
         {
           tournamentId: tournamentId,
           matchId: match._id,
@@ -139,7 +139,7 @@ const TournamentMatches = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/approve-score',
+        process.env.REACT_APP_API_URL + '/approve-score',
         {
           tournamentId: tournamentId,
           matchId: match._id,
@@ -176,7 +176,7 @@ const TournamentMatches = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/dispute-score',
+        process.env.REACT_APP_API_URL + '/dispute-score',
         {
           tournamentId: tournamentId,
           matchId: matchId,

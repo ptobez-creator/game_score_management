@@ -1,2 +1,7 @@
 .env
 node_modules/
+frontend/my_frontend/.env
+frontend/my_frontend/.env.production
+FifaTournamentMobile/.npmrc
+**/package-lock.json
+.env

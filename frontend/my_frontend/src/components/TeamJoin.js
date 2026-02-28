@@ -22,7 +22,7 @@ const TeamJoin = ({ onTeamSelected }) => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await axios.get('http://localhost:5000/teams/my-team', {
+        const response = await axios.get(process.env.REACT_APP_API_URL + '/teams/my-team', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -54,7 +54,7 @@ const TeamJoin = ({ onTeamSelected }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:5000/teams/create', {
+      const response = await axios.post(process.env.REACT_APP_API_URL + '/teams/create', {
         name: teamName,
         description: teamDescription,
       }, {
@@ -85,7 +85,7 @@ const TeamJoin = ({ onTeamSelected }) => {
     try {
       const token = localStorage.getItem('token');
       // Call backend to find and join team by name
-      const response = await axios.post('http://localhost:5000/teams/join-by-name', {
+      const response = await axios.post(process.env.REACT_APP_API_URL + '/teams/join-by-name', {
         teamName: joinTeamName,
       }, {
         headers: { Authorization: `Bearer ${token}` },
@@ -114,7 +114,7 @@ const TeamJoin = ({ onTeamSelected }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:5000/teams/join-by-code', {
+      const response = await axios.post(process.env.REACT_APP_API_URL + '/teams/join-by-code', {
         code: inviteCode,
       }, {
         headers: { Authorization: `Bearer ${token}` },

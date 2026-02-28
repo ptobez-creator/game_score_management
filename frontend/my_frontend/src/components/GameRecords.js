@@ -6,7 +6,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 
-const socket = io('http://localhost:5000');
+const socket = io(process.env.REACT_APP_API_URL + '');
 
 const GameRecords = () => {
   const [games, setGames] = useState([]);
@@ -22,7 +22,7 @@ const GameRecords = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/games', {
+        const response = await axios.get(process.env.REACT_APP_API_URL + '/games', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setGames(response.data);

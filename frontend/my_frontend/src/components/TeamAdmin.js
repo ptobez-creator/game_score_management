@@ -44,10 +44,10 @@ const TeamAdmin = () => {
       }
 
       const [teamResponse, membersResponse] = await Promise.all([
-        axios.get('http://localhost:5000/teams/my-team', {
+        axios.get(process.env.REACT_APP_API_URL + '/teams/my-team', {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get('http://localhost:5000/teams/team-members', {
+        axios.get(process.env.REACT_APP_API_URL + '/teams/team-members', {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -78,7 +78,7 @@ const TeamAdmin = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/teams/create', {
+      await axios.post(process.env.REACT_APP_API_URL + '/teams/create', {
         name: teamName,
         description: teamDescription,
       }, {
@@ -104,7 +104,7 @@ const TeamAdmin = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:5000/teams/update', {
+      await axios.put(process.env.REACT_APP_API_URL + '/teams/update', {
         name: teamName,
         description: teamDescription,
       }, {
@@ -129,7 +129,7 @@ const TeamAdmin = () => {
     setIsSearching(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/teams/search-available-members', {
+      const response = await axios.get(process.env.REACT_APP_API_URL + '/teams/search-available-members', {
         params: { query: searchQuery },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -144,7 +144,7 @@ const TeamAdmin = () => {
   const handleAddMember = async (memberId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/teams/add-member', {
+      await axios.post(process.env.REACT_APP_API_URL + '/teams/add-member', {
         memberId,
       }, {
         headers: { Authorization: `Bearer ${token}` },
@@ -166,7 +166,7 @@ const TeamAdmin = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/teams/remove-member', {
+      await axios.post(process.env.REACT_APP_API_URL + '/teams/remove-member', {
         memberId,
       }, {
         headers: { Authorization: `Bearer ${token}` },
@@ -186,7 +186,7 @@ const TeamAdmin = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete('http://localhost:5000/teams/delete', {
+      await axios.delete(process.env.REACT_APP_API_URL + '/teams/delete', {
         headers: { Authorization: `Bearer ${token}` },
       });
 

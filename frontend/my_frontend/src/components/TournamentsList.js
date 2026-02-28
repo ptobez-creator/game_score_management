@@ -22,7 +22,7 @@ const TournamentsList = () => {
         }
 
         const response = await axios.get(
-          'http://localhost:5000/tournaments',
+          process.env.REACT_APP_API_URL + '/tournaments',
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

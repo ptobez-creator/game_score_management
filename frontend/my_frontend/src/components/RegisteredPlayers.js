@@ -31,7 +31,7 @@ const RegisteredPlayers = () => {
           console.error('Error decoding token:', e);
         }
 
-        const response = await axios.get('http://localhost:5000/teams/team-members', {
+        const response = await axios.get(process.env.REACT_APP_API_URL + '/teams/team-members', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
