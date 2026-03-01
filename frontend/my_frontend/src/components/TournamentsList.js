@@ -21,7 +21,9 @@ const TournamentsList = () => {
           return;
         }
 
-        const response = await axios.get('/tournaments');
+        const response = await axios.get('/tournaments', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
         if (Array.isArray(response.data)) {
           setTournaments(response.data);
