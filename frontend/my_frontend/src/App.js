@@ -17,8 +17,6 @@ import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-axios.defaults.baseURL = '/api';
-
 // Component that uses useLocation - must be inside Router
 function AppContent() {
   const [user, setUser] = useState(null);
