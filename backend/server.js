@@ -31,6 +31,7 @@ const frontendOriginsFromEnv = [
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
+  'http://54.246.162.122',
   ...frontendOriginsFromEnv,
 ];
 
