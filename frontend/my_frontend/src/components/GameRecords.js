@@ -7,7 +7,10 @@ import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../config/runtimeConfig';
 
-const socket = io(API_URL);
+// In production, use relative URL (empty string uses current origin)
+// In development, use the configured API_URL
+const socketURL = process.env.NODE_ENV === 'development' ? API_URL : '';
+const socket = io(socketURL);
 
 const GameRecords = () => {
   const [games, setGames] = useState([]);
